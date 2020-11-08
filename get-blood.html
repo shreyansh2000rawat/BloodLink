@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="node_modules/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="styles/index.css">
+    <link rel="stylesheet" href="styles/get-blood.css">
+</head>
+
+<body>
+    <div id="loading-profile"
+        style="z-index: 1000;top: 0;bottom: 0;left: 0;right: 0;display: flex; transition: opacity 0.3s;"
+        class="position-absolute bg-light align-items-center justify-content-center">
+        <div class="spinner-border" role="status">
+        </div>
+    </div>
+    <!-- DOM -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top ">
+        <a class="navbar-brand" href="#">
+            <div>
+                Blood Link
+            </div>
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav" style="margin-left: auto;">
+
+                <li style="display: none;" id="profile-link" class="nav-item active">
+                    <a class="nav-link" href="profile.html">Profile</a>
+                </li>
+                <li id="profile-link" class="nav-item active">
+                    <a class="nav-link" href="index.html">Home</a>
+                </li>
+                <li style="display: none;" id="logout-link" class="nav-item active">
+                    <a class="nav-link" href="#" onclick="event.preventDefault();logout();">Logout</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <div id="top-heading-cont" class="container-fluid px-0">
+        <div class="container position-relative">
+            <h1 class="font-weight-normal d-none d-lg-block">Get Blood</h1>
+            <h2 class="font-weight-normal d-block d-lg-none text-center">Get Blood</h2>
+        </div>
+    </div>
+
+    <div class="container py-4">
+        <div class="row no-gutters flex-wrap align-items-baseline">
+            <p class="col-auto pr-4">Select the blood type you want blood for: </p>
+            <form id="search-form" class="col-auto d-flex align-items-center">
+                <div class="pr-4">
+                    <select id="blood-group" class="p-1 rounded" required>
+                        <option value="">--</option>
+                        <option value="A+">A+</option>
+                        <option value="A-">A-</option>
+                        <option value="B+">B+</option>
+                        <option value="B-">B-</option>
+                        <option value="AB+">AB+</option>
+                        <option value="AB-">AB-</option>
+                        <option value="O+">O+</option>
+                        <option value="O-">O-</option>
+                    </select>
+                </div>
+                <button id="search-btn" type="submit" class="btn btn-dark btn-primary py-1">Get List</button>
+            </form>
+        </div>
+
+        <div style="display: none;" id="loader" class="mt-5 justify-content-center">
+            <div class="spinner-border text-dark" role="status"></div>
+        </div>
+
+        <div style="display: none;" id="table-cont" class="table-responsive mt-4">
+            <table class="table">
+                <thead id="myTableHeader" class="thead-dark">
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Name</th>
+                        <th scope="col">Blood Type</th>
+                        <th scope="col">Email ID</th>
+                        <th scope="col">Mobile No.</th>
+                    </tr>
+                </thead>
+                <tbody id="myTableBody">
+
+                </tbody>
+            </table>
+        </div>
+        <div style="display: none;" id="no-result" class="mt-5 justify-content-center">
+            <p>No result!</p>
+        </div>
+
+    </div>
+    <!-- DOM --ends -->
+    <!-- scripts -->
+
+    <!--popper, jquery, bootstrap-->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+        integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
+        crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+    <!--popper, jquery, bootstrap --ends -->
+
+    <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/7.10.0/firebase-app.js"></script>
+    <!-- Add Firebase products that you want to use -->
+    <script src="https://www.gstatic.com/firebasejs/7.10.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.10.0/firebase-firestore.js"></script>
+    <!-- <script src="https://www.gstatic.com/firebasejs/7.10.0/firebase-storage.js"></script> -->
+    <script>
+        // Your web app's Firebase configuration
+        var firebaseConfig = {
+            apiKey: "AIzaSyDMyqpj2Bj4S3KCulPHV78V83_4bTo9A94",
+            authDomain: "bloodlink-6d667.firebaseapp.com",
+            databaseURL: "https://bloodlink-6d667.firebaseio.com",
+            projectId: "bloodlink-6d667",
+            storageBucket: "bloodlink-6d667.appspot.com",
+            messagingSenderId: "919354695415",
+            appId: "1:919354695415:web:8b203d6f90d6f221b97df2"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        firebase.auth().onAuthStateChanged(function (user) {
+            removeOverlay()
+            if (user) {
+                // User is signed in.
+                // var displayName = user.displayName;
+                // var email = user.email;
+                // var emailVerified = user.emailVerified;
+                // var photoURL = user.photoURL;
+                // var isAnonymous = user.isAnonymous;
+                // var uid = user.uid;
+                // var providerData = user.providerData;
+
+                document.getElementById("profile-link").style.display = "inline-block"
+                document.getElementById("logout-link").style.display = "inline-block"
+            } else {
+                // User is signed out.
+            }
+        });
+    </script>
+    </script>
+    <script>
+        var db = firebase.firestore();
+        document.getElementById("search-form").addEventListener("submit", function (event) {
+            event.target[1].disabled = true
+            event.preventDefault();
+            document.getElementById("no-result").style.display = "none"
+            document.getElementById("table-cont").style.display = "none"
+            document.getElementById("loader").style.display = "flex"
+            var bloodGroup = event.target[0].value
+            switch (bloodGroup) {
+                case 'A+': getRsult(['A+', 'A-', 'O+', 'O-']); break;
+                case 'A-': getRsult(['A-', 'O-']); break;     
+                case 'B-': getRsult(['B-', 'O-']); break;
+                case 'B+': getRsult(['B+', 'B-', 'O+', 'O-']); break;
+                case 'AB+': getRsult(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'] ); break;
+                case 'AB-': getRsult(['A-', 'B-', 'AB-', 'O-']); break;
+                case 'O+': getRsult(['O+', 'O-']); break;
+                case 'O-': getRsult( ['O-']); break;
+            }
+        })
+        function logout() {
+            firebase.auth().signOut().then(function () {
+                // Sign-out successful.
+                window.location.href = "./index.html"
+            }).catch(function (error) {
+                var errorMessage = error.message;
+                alert(errorMessage);
+            });
+        }
+        function getRsult(arr) {
+            db.collection("users").where('bloodGroup', 'in', arr).get().then((querySnapshot) => {
+                if (querySnapshot.size) {
+                    let tableBd = document.getElementById("myTableBody");
+                    tableBd.innerHTML = ""
+                    document.getElementById("loader").style.display = "none"
+                    document.getElementById("table-cont").style.display = "block"
+                    let count = querySnapshot.size
+                    querySnapshot.forEach(function (doc) {
+                        //doc.id
+                        let data = doc.data()
+                        let row = tableBd.insertRow(0);
+                        let cell1 = row.insertCell(0);
+                        let cell2 = row.insertCell(1);
+                        let cell3 = row.insertCell(2);
+                        let cell4 = row.insertCell(3);
+                        let cell5 = row.insertCell(4);
+                        cell1.innerHTML = count; --count;
+                        cell2.innerHTML = data.name;
+                        cell3.innerHTML = data.bloodGroup;
+                        cell4.innerHTML = data.email;
+                        cell5.innerHTML = data.mobile;
+                    });
+                } else {
+                    document.getElementById("loader").style.display = "none"
+                    document.getElementById("no-result").style.display = "flex"
+                } 
+                document.getElementById("search-btn").disabled = false
+            }).catch(function (error) {
+                var errorMessage = error.message;
+                alert(errorMessage);
+                document.getElementById("loader").style.display = "none"
+                document.getElementById("search-btn").disabled = false
+            });
+        }
+        function removeOverlay() {
+             let t =  document.getElementById("loading-profile")
+             t.style.opacity = "0";
+            setTimeout(function(){t.style.display = "none"; document.body.style.overflow = "auto";}, 500);
+        }
+    </script>
+    <!-- scripts --end -->
+</body>
+
+</html>

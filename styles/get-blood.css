@@ -1,0 +1,17 @@
+#top-heading-cont {
+  background: var(--navbar-primary-light);
+  padding-top: calc(2 * var(--navbar-height));
+  padding-bottom: calc(var(--navbar-height));
+  color: white;
+}
+
+.table .thead-dark th{
+    background: #2b2b2b;
+    font-weight: 500;
+}
+
+th, td {
+    text-align: center;
+    font-size: 14px;
+    white-space: nowrap;
+}
